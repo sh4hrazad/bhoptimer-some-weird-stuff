@@ -7,7 +7,7 @@
 
 public Plugin myinfo = {
     name = "Show Speed",
-    author = "Shahrazad (actually some code is stolen from others D:",
+    author = "Shahrazad",
 };
 
 Handle gH_SpeedHUD = null;
@@ -52,7 +52,7 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
     if (!IsFakeClient(client)) DrawSpeedHud(client, target);
 }
 
-stock int GetSpectatorTarget(int client) {
+int GetSpectatorTarget(int client) {
 	if (GetClientTeam(client) == TEAM_SPECTATOR) {
 		int mode = GetEntProp(client, Prop_Send, "m_iObserverMode");
 		if (mode == 4 || mode == 5) { // 4 = ineye mode, 5 = chase mode
@@ -66,7 +66,7 @@ stock int GetSpectatorTarget(int client) {
 	return client;
 }
 
-stock bool IsValidClient(int client, bool botsValid = false) {
+bool IsValidClient(int client, bool botsValid = false) {
 	return (0 < client <= MaxClients) && IsClientInGame(client) && (botsValid || !IsFakeClient(client));
 }
 
@@ -90,7 +90,7 @@ void DrawSpeedHudText(int client, float CurrentSpeed) {
     ShowSyncHudText(client, gH_SpeedHUD, "%s", sbuffer);
 }
 
-stock bool GetClientCookieBool(int client, Handle cookie)
+bool GetClientCookieBool(int client, Handle cookie)
 {
 	char sValue[8];
 	GetClientCookie(client, gH_ShowSpeedCookie, sValue, sizeof(sValue));
@@ -98,7 +98,7 @@ stock bool GetClientCookieBool(int client, Handle cookie)
 	return (sValue[0] != '\0' && StringToInt(sValue));
 }
 
-stock void SetClientCookieBool(int client, Handle cookie, bool value)
+void SetClientCookieBool(int client, Handle cookie, bool value)
 {
 	char sValue[8];
 	IntToString(value, sValue, sizeof(sValue));
