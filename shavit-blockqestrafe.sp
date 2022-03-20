@@ -70,12 +70,12 @@ public void OnButtonPress(int client, int button) {
     if (gEV_QEInfo[client].fLastTime >= curTime) {
         if (gEV_QEInfo[client].iQECount < 5) {
             gEV_QEInfo[client].iQECount++;
-            CPrintToChat(client, "{white}%s detected. (%s%i{white}/{fl4n}%i{white})",
+            CPrintToChat(client, "{white}%s detected. (%s%i{white}/{lightgreen}%i{white})",
                 button == IN_LEFT ? "+left" : "+right",
                 gEV_QEInfo[client].iQECount == 5 ? "{red}" : "{lightblue}",
                 gEV_QEInfo[client].iQECount, 5);
             if (gEV_QEInfo[client].iQECount == 5) {
-                CPrintToChat(client, "{red}!!! {white}USING {fl4n}+left{white}/{fl4n}+right{white} TOO FREQUENTLY WILL RESULT IN TIMER STOPPED {red}!!!");
+                CPrintToChat(client, "{red}!!! {white}USING {lightgreen}+left{white}/{lightgreen}+right{white} TOO FREQUENTLY WILL RESULT IN TIMER STOPPED {red}!!!");
             }
         }
         else {
@@ -84,13 +84,13 @@ public void OnButtonPress(int client, int button) {
     }
     else if (gEV_QEInfo[client].iQECount > 1) {
         gEV_QEInfo[client].iQECount--;
-        CPrintToChat(client, "{white}%s detected. ({lightblue}%i{white}/{fl4n}%i{white})",
+        CPrintToChat(client, "{white}%s detected. ({lightblue}%i{white}/{lightgreen}%i{white})",
             button == IN_LEFT ? "+left" : "+right",
             gEV_QEInfo[client].iQECount, 5);
     }
     else if (gEV_QEInfo[client].iQECount == 0) {
         gEV_QEInfo[client].iQECount++; // initialize
-        CPrintToChat(client, "{white}%s detected. ({lightblue}%i{white}/{fl4n}%i{white})",
+        CPrintToChat(client, "{white}%s detected. ({lightblue}%i{white}/{lightgreen}%i{white})",
             button == IN_LEFT ? "+left" : "+right", gEV_QEInfo[client].iQECount, 5);
     }
 

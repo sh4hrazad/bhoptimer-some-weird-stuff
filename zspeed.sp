@@ -34,10 +34,10 @@ public Action Command_ShowSpeed(int client, int args) {
 	if (client != 0) {
 		gB_ShowSpeed[client] = !gB_ShowSpeed[client];
 		SetClientCookieBool(client, gH_ShowSpeedCookie, gB_ShowSpeed[client]);
-		CReplyToCommand(client, "{white}Show Speed {fl4n}%s{white}.", gB_ShowSpeed[client] ? "enabled" : "disabled");
+		CReplyToCommand(client, "{white}Show Speed {lightgreen}%s{white}.", gB_ShowSpeed[client] ? "enabled" : "disabled");
 	}
 	else {
-		CReplyToCommand(client, "{red}!!! {white}Invalid client!");
+		ReplyToCommand(client, "[SM] Invalid client!");
 	}
 	
 	return Plugin_Handled;
