@@ -1,22 +1,16 @@
-// !!! incompleted plugin
 // !!! Please make sure that your timer has been updated to 3.2.0 or higher, or stuff may break.
-// TODO : Delete & replace LoadCheckpointCache() after timer updated.
 
 /* -- Includes -- */
 // base
 #include <sourcemod>
 
 // misc
-#include <dhooks>
-#include <eventqueuefix>
 #include <multicolors>
 #include <sdktools>
 
 // bhoptimer
 #include <shavit/core>
 #include <shavit/checkpoints>
-#include <shavit/physicsuntouch>
-#include <shavit/replay-recorder>
 
 // coding rule
 #pragma newdecls required
@@ -34,19 +28,16 @@ ConVar gCV_MaxCP = null;
 ConVar gCV_MaxCP_Segmented = null;
 
 ArrayList gA_GlobalCheckpoints = null;
-EngineVersion gEV_Type;
 
 int gI_CheckpointsSaved;    // begins from 1, 0 if no checkpoints
 int gI_CheckpointSelected[MAXPLAYERS + 1];
-bool gB_ReplayRecorder = false;
-bool gB_Eventqueuefix = false;
 
 /* -- Plugin Info -- */
 public Plugin myinfo = {
-    name        = "[Shavit] Global Checkpoints",
-    author      = "Shahrazad",
-    version     = SHAVIT_VERSION,
-    description = "Show a menu that lists checkpoints that all players saved."
+    name        =       "[Shavit] Global Checkpoints",
+    author      =       "Shahrazad",
+    description =       "Show a menu that lists checkpoints that all players saved.",
+    version     =       SHAVIT_VERSION,
 };
 
 /* -- Initialization -- */
@@ -55,51 +46,14 @@ public void OnPluginStart() {
     RegConsoleCmd("sm_gcp", Command_GlobalCheckpoints,
         "Show a menu that lists checkpoints that all players saved.");
     RegConsoleCmd("sm_getcp", Command_GetCheckpoint,
-        "Copies a checkpoint to your menu from global cps menu. Usage: sm_getcp #<global cp num>");
+        "Copy a checkpoint to your menu from global cps menu. Usage: sm_getcp #<global cp num>");
     
     gCV_MaxCP = FindConVar("shavit_checkpoints_maxcp");
     gCV_MaxCP_Segmented = FindConVar("shavit_checkpoints_maxcp_seg");
 
-    gEV_Type = GetEngineVersion();
-
     if (gA_GlobalCheckpoints == null) {
         gA_GlobalCheckpoints = new ArrayList(sizeof(global_cp_cache_t));
     }
-
-    LoadDHooks();
-
-    gB_ReplayRecorder = LibraryExists("shavit-replay-recorder");
-    gB_Eventqueuefix = LibraryExists("eventqueuefix");
-}
-
-public void OnLibraryAdded(const char[] name) {
-	if (StrEqual(name, "shavit-replay-recorder")) {
-		gB_ReplayRecorder = true;
-	}
-	else if (StrEqual(name, "eventqueuefix")) {
-		gB_Eventqueuefix = true;
-	}
-}
-
-public void OnLibraryRemoved(const char[] name) {
-	if (StrEqual(name, "shavit-replay-recorder")) {
-		gB_ReplayRecorder = false;
-	}
-	else if (StrEqual(name, "eventqueuefix")) {
-		gB_Eventqueuefix = false;
-	}
-}
-
-void LoadDHooks() {
-	Handle hGameData = LoadGameConfigFile("shavit.games");
-
-	if (hGameData == null) {
-		SetFailState("Failed to load shavit gamedata");
-	}
-
-	LoadPhysicsUntouch(hGameData);
-
-	delete hGameData;
 }
 
 /* -- Reset on next map -- */
@@ -130,8 +84,7 @@ public Action Command_GetCheckpoint(int client, any args) {
     if (client == 0) {
     	ReplyToCommand(client, "[SM] This command can only be used in-game.");
     	return Plugin_Handled;
-	}
-    else if (args < 1) {
+	} else if (args < 1) {
         CPrintToChat(client, "{white}Usage: sm_getcp #<{lightgreen}global cp num{white}>");
         return Plugin_Handled;
     }
@@ -186,8 +139,7 @@ void OpenGlobalCheckpointsMenu(int client, int item = 0) {
 
     if (gI_CheckpointsSaved == 0) {
         hMenu.AddItem("", "Nothing temporarily", ITEMDRAW_DISABLED);
-    }
-    else {
+    } else {
         int iIndex;
         char sIndex[8];
 
@@ -223,14 +175,11 @@ public int MenuHandler_GlobalCheckpoints(Menu menu, MenuAction action, int param
 
         if (StrEqual(sInfo, "save")) {
             SaveGlobalCheckpoint(param1, gI_CheckpointSelected[param1]);
-        }
-        else if (StrEqual(sInfo, "cpmenu")) {
+        } else if (StrEqual(sInfo, "cpmenu")) {
             FakeClientCommandEx(param1, "sm_checkpoints");
-        }
-        else if (StrEqual(sInfo, "refresh")) {
+        } else if (StrEqual(sInfo, "refresh")) {
             // do nothing, just refresh the menu.
-        }
-        else {
+        } else {
             char sInfoGuess[8];
             int iIndex;
 
@@ -244,8 +193,7 @@ public int MenuHandler_GlobalCheckpoints(Menu menu, MenuAction action, int param
         }
         OpenGlobalCheckpointsMenu(param1, GetMenuSelectionPosition());
         
-    }
-    else if(action == MenuAction_End) {
+    } else if (action == MenuAction_End) {
 		delete menu;
 	}
 
@@ -257,32 +205,18 @@ public void Shavit_OnCheckpointCacheSaved(int client, cp_cache_t cache, int inde
     global_cp_cache_t checkpoint;
     checkpoint.cpcache = cache;
 
-    /* rewrite the following stuff
-     * because these will be deleted as soon as a player deletes the original checkpoint,
-     * or eventqueue will SPAM errors on teleporting.
-     *
-     * stuff: aEvents, aOutputWaits, customdata
-     *
-     * btw considering whether memory leak could happen.
-     */
-
-    // no need to preserve it, after all no records because timer is not running
-    delete checkpoint.cpcache.aFrames;
-    checkpoint.cpcache.aFrames = null;
+    // refered to Shavit_SetCheckpoint()
+    if (cache.aFrames)
+        checkpoint.cpcache.aFrames = cache.aFrames.Clone();
+    if (cache.aEvents)
+        checkpoint.cpcache.aEvents = cache.aEvents.Clone();
+    if (cache.aOutputWaits)
+        checkpoint.cpcache.aOutputWaits = cache.aOutputWaits.Clone();
+    if (cache.customdata)
+        checkpoint.cpcache.customdata = view_as<StringMap>(CloneHandle(cache.customdata));
     
     // no need to preserve it, load all cps from the menu and switch to practice mode or stop timer
     checkpoint.cpcache.iSteamID = -1;
-
-    if (gB_Eventqueuefix && !IsFakeClient(target)) {
-		eventpack_t ep;
-
-		if (GetClientEvents(target, ep)) {
-			checkpoint.cpcache.aEvents = ep.playerEvents;
-			checkpoint.cpcache.aOutputWaits = ep.outputWaits;
-		}
-    }
-
-    checkpoint.cpcache.customdata = new StringMap();
 
     GetClientName(client, checkpoint.sPlayerName, sizeof(checkpoint.sPlayerName));
     checkpoint.iCheckpointNumber = gI_CheckpointsSaved + 1;
@@ -294,84 +228,14 @@ public void Shavit_OnCheckpointCacheSaved(int client, cp_cache_t cache, int inde
 
 /* -- Teleport the player to the global checkpoint that is selected -- */
 bool TeleportToGlobalCheckpoint(int client, int index) {
-    // get cp
     global_cp_cache_t checkpoint;
     gA_GlobalCheckpoints.GetArray(index - 1, checkpoint, sizeof(checkpoint));
     
-    /* Shavit_TeleportToCheckpointCache(client, checkpoint, false);
-     * there's no native like this so i have to copy one from shavit-checkpoints.sp :(
-     * wtf i copied too much code from there.. maybe post an issue to ask for it?
-     */
-    LoadCheckpointCache(client, checkpoint.cpcache);
+    Shavit_LoadCheckpointCache(client, checkpoint.cpcache, -1, sizeof(cp_cache_t));
 
     Shavit_ResumeTimer(client);
 
     return true;
-}
-
-/* -- Load & teleport to checkpoint -- */
-void LoadCheckpointCache(int client, cp_cache_t cpcache) {
-	SetEntityMoveType(client, cpcache.iMoveType);
-	SetEntityFlags(client, cpcache.iFlags);
-
-	int ground = (cpcache.iGroundEntity != -1) ? EntRefToEntIndex(cpcache.iGroundEntity) : -1;
-	SetEntPropEnt(client, Prop_Data, "m_hGroundEntity", ground);
-
-	if (gEV_Type != Engine_TF2) {
-		SetEntPropVector(client, Prop_Data, "m_vecLadderNormal", cpcache.vecLadderNormal);
-		SetEntPropFloat(client, Prop_Send, "m_flStamina", cpcache.fStamina);
-		SetEntProp(client, Prop_Send, "m_bDucked", cpcache.bDucked);
-		SetEntProp(client, Prop_Send, "m_bDucking", cpcache.bDucking);
-	}
-
-	if (gEV_Type == Engine_CSS) {
-		SetEntPropFloat(client, Prop_Send, "m_flDucktime", cpcache.fDucktime);
-	}
-	else if (gEV_Type == Engine_CSGO) {
-		SetEntPropFloat(client, Prop_Send, "m_flDuckAmount", cpcache.fDucktime);
-		SetEntPropFloat(client, Prop_Send, "m_flDuckSpeed", cpcache.fDuckSpeed);
-	}
-
-    // no need to care about it, just turn timer into practice mode
-	cpcache.aSnapshot.bPracticeMode = true;
-
-	// Do this here to trigger practice mode alert
-	Shavit_SetPracticeMode(client, true, true);
-
-	if (!Shavit_LoadSnapshot(client, cpcache.aSnapshot)) {
-		Shavit_StopTimer(client);
-
-		return;
-	}
-
-	Shavit_UpdateLaggedMovement(client, true);
-	SetEntPropString(client, Prop_Data, "m_iName", cpcache.sTargetname);
-	SetEntPropString(client, Prop_Data, "m_iClassname", cpcache.sClassname);
-
-	TeleportEntity(client, cpcache.fPosition, cpcache.fAngles, cpcache.fVelocity);
-
-	// Used to trigger all endtouch booster events which are then wiped via eventqueuefix :)
-	MaybeDoPhysicsUntouch(client);
-
-	if (!cpcache.aSnapshot.bPracticeMode) {
-		if (gB_ReplayRecorder) {
-			Shavit_HijackAngles(client, cpcache.fAngles[0], cpcache.fAngles[1], -1);
-		}
-	}
-
-	SetEntityGravity(client, cpcache.fGravity);
-    
-	if (gB_ReplayRecorder && cpcache.aFrames != null) {
-		Shavit_SetPlayerPreFrames(client, cpcache.iPreFrames);
-	}
-    
-
-	if (gB_Eventqueuefix && cpcache.aEvents != null && cpcache.aOutputWaits != null) {
-		eventpack_t ep;
-		ep.playerEvents = cpcache.aEvents;
-		ep.outputWaits = cpcache.aOutputWaits;
-		SetClientEvents(client, ep);
-	}
 }
 
 /* -- Save the global checkpoint to the client's checkpoint menu -- */
@@ -402,14 +266,11 @@ public void GetFormatedLapsedTime(int timestamp, int currentTime, char[] buffer,
 
     if (iLapsedTime < 10) {
         FormatEx(buffer, size, "Just now");
-    }
-    else if (iLapsedTime >= 10 && iLapsedTime < 61) {
+    } else if (iLapsedTime >= 10 && iLapsedTime < 61) {
         FormatEx(buffer, size, "%d seconds ago", iLapsedTime);
-    }
-    else if (iLapsedTime >= 61 && iLapsedTime < 3601) {
+    } else if (iLapsedTime >= 61 && iLapsedTime < 3601) {
         FormatEx(buffer, size, "%d %s ago", iLapsedTime / 60, iLapsedTime / 60 == 1 ? "minute" : "minutes");
-    }
-    else {
+    } else {
         FormatEx(buffer, size, "long long ago...");
     }
 }
