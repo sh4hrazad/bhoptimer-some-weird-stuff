@@ -62,8 +62,7 @@ public Action HookTrigger(int entity, int other) {
     return Plugin_Continue;
 }
 
-bool IsValidClient(int client)
-{
+bool IsValidClient(int client) {
 	return (client >= 1 
         && client <= MaxClients 
         && IsClientConnected(client) 
