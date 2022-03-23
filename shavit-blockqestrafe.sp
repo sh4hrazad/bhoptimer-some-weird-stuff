@@ -4,6 +4,7 @@
 #include <multicolors>
 
 #pragma newdecls required
+#pragma semicolon 1
 
 public Plugin myinfo = {
     name = "[Shavit] Q/E strafe detector",
@@ -19,7 +20,7 @@ enum struct QEInfo {
 	int iQECount;
 }
 
-QEInfo gEV_QEInfo[MAXPLAYERS + 1];
+QEInfo g_QEInfo[MAXPLAYERS + 1];
 
 public void OnPluginStart() {
     // do nothing maybe
@@ -27,13 +28,13 @@ public void OnPluginStart() {
 
 public void OnClientPutInServer(int client)
 {
-    gEV_QEInfo[client].fLastTime = 0.0;
-    gEV_QEInfo[client].iLastButtons = 0;
-    gEV_QEInfo[client].iQECount = 0;
+    g_QEInfo[client].fLastTime = 0.0;
+    g_QEInfo[client].iLastButtons = 0;
+    g_QEInfo[client].iQECount = 0;
 }
 
 public void OnClientDisconnect_Post(int client) {
-    gEV_QEInfo[client].iLastButtons = 0;
+    g_QEInfo[client].iLastButtons = 0;
 }
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2]) {
@@ -42,23 +43,23 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
         || Shavit_GetTimerStatus(client) != Timer_Running // detect only when player running
         || Shavit_GetClientTime(client) == 0.0 // dont detect in start zone (if timer not running)
         || Shavit_GetStyleSettingBool(Shavit_GetBhopStyle(client), "tas") /* dont check tas style */) {
-            gEV_QEInfo[client].iQECount = 0;
+            g_QEInfo[client].iQECount = 0;
 
             return Plugin_Continue;
         }
     
     if (buttons & IN_LEFT) {
-        if (!(gEV_QEInfo[client].iLastButtons & IN_LEFT)) {
+        if (!(g_QEInfo[client].iLastButtons & IN_LEFT)) {
             OnButtonPress(client, IN_LEFT);
         }
     }
     else if (buttons & IN_RIGHT) {
-        if (!(gEV_QEInfo[client].iLastButtons & IN_RIGHT)) {
+        if (!(g_QEInfo[client].iLastButtons & IN_RIGHT)) {
             OnButtonPress(client, IN_RIGHT);
         }
     }
 
-    gEV_QEInfo[client].iLastButtons = buttons;
+    g_QEInfo[client].iLastButtons = buttons;
 
     return Plugin_Continue;
 }
@@ -67,14 +68,14 @@ public void OnButtonPress(int client, int button) {
     float curTime = GetGameTime();
     float newTime = curTime + gF_DetectionTime;
 
-    if (gEV_QEInfo[client].fLastTime >= curTime) {
-        if (gEV_QEInfo[client].iQECount < 5) {
-            gEV_QEInfo[client].iQECount++;
+    if (g_QEInfo[client].fLastTime >= curTime) {
+        if (g_QEInfo[client].iQECount < 5) {
+            g_QEInfo[client].iQECount++;
             CPrintToChat(client, "{white}%s detected. (%s%i{white}/{lightgreen}%i{white})",
                 button == IN_LEFT ? "+left" : "+right",
-                gEV_QEInfo[client].iQECount == 5 ? "{red}" : "{lightblue}",
-                gEV_QEInfo[client].iQECount, 5);
-            if (gEV_QEInfo[client].iQECount == 5) {
+                g_QEInfo[client].iQECount == 5 ? "{red}" : "{lightblue}",
+                g_QEInfo[client].iQECount, 5);
+            if (g_QEInfo[client].iQECount == 5) {
                 CPrintToChat(client, "{red}!!! {white}USING {lightgreen}+left{white}/{lightgreen}+right{white} TOO FREQUENTLY WILL RESULT IN TIMER STOPPED {red}!!!");
             }
         }
@@ -82,23 +83,23 @@ public void OnButtonPress(int client, int button) {
             QEStopTimer(client);
         }
     }
-    else if (gEV_QEInfo[client].iQECount > 1) {
-        gEV_QEInfo[client].iQECount--;
+    else if (g_QEInfo[client].iQECount > 1) {
+        g_QEInfo[client].iQECount--;
         CPrintToChat(client, "{white}%s detected. ({lightblue}%i{white}/{lightgreen}%i{white})",
             button == IN_LEFT ? "+left" : "+right",
-            gEV_QEInfo[client].iQECount, 5);
+            g_QEInfo[client].iQECount, 5);
     }
-    else if (gEV_QEInfo[client].iQECount == 0) {
-        gEV_QEInfo[client].iQECount++; // initialize
+    else if (g_QEInfo[client].iQECount == 0) {
+        g_QEInfo[client].iQECount++; // initialize
         CPrintToChat(client, "{white}%s detected. ({lightblue}%i{white}/{lightgreen}%i{white})",
-            button == IN_LEFT ? "+left" : "+right", gEV_QEInfo[client].iQECount, 5);
+            button == IN_LEFT ? "+left" : "+right", g_QEInfo[client].iQECount, 5);
     }
 
-    gEV_QEInfo[client].fLastTime = newTime;
+    g_QEInfo[client].fLastTime = newTime;
 }
 
 public void QEStopTimer(int client) {
     Shavit_StopTimer(client);
     CPrintToChat(client, "{white}i said {red}:(");
-    gEV_QEInfo[client].iQECount = 0;
+    g_QEInfo[client].iQECount = 0;
 }
