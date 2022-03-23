@@ -62,6 +62,10 @@ public void OnMapStart() {
     gA_GlobalCheckpoints = new ArrayList(sizeof(global_cp_cache_t));
 }
 
+public void OnClientDisconnect(int client) {
+    gI_CheckpointSelected[client] = 0;
+}
+
 /* -- Prevent memory leak..?? -- */
 public void OnPluginEnd() {
     // in case that someone re/unload the plugin?
