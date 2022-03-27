@@ -31,15 +31,15 @@ public void OnClientCookiesCached(int client) {
 }
 
 public Action Command_ShowSpeed(int client, int args) {
-	if (client != 0) {
-		gB_ShowSpeed[client] = !gB_ShowSpeed[client];
-		SetClientCookieBool(client, gH_ShowSpeedCookie, gB_ShowSpeed[client]);
-		CReplyToCommand(client, "{white}Showspeed {lightgreen}%s{white}.", gB_ShowSpeed[client] ? "enabled" : "disabled");
-	} else {
-		ReplyToCommand(client, "[SM] Invalid client!");
-	}
+    if (client != 0) {
+        gB_ShowSpeed[client] = !gB_ShowSpeed[client];
+        SetClientCookieBool(client, gH_ShowSpeedCookie, gB_ShowSpeed[client]);
+        CReplyToCommand(client, "{white}Showspeed {lightgreen}%s{white}.", gB_ShowSpeed[client] ? "enabled" : "disabled");
+    } else {
+        ReplyToCommand(client, "[SM] Invalid client!");
+    }
 	
-	return Plugin_Handled;
+    return Plugin_Handled;
 }
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2]) {
@@ -55,21 +55,21 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 }
 
 int GetSpectatorTarget(int client) {
-	if (IsClientObserver(client)) {
-		int mode = GetEntProp(client, Prop_Send, "m_iObserverMode");
-		if (mode == 4 || mode == 5) { // 4 = ineye mode, 5 = chase mode
-			int target = GetEntPropEnt(client, Prop_Send, "m_hObserverTarget");
-			if (target != -1) {
-				return target;
-			}
-		}
-	}
+    if (IsClientObserver(client)) {
+        int mode = GetEntProp(client, Prop_Send, "m_iObserverMode");
+        if (mode == 4 || mode == 5) { // 4 = ineye mode, 5 = chase mode
+            int target = GetEntPropEnt(client, Prop_Send, "m_hObserverTarget");
+            if (target != -1) {
+                return target;
+            }
+        }
+    }
 
-	return client;
+    return client;
 }
 
 bool IsValidClient(int client, bool botsValid = false) {
-	return (0 < client <= MaxClients) && IsClientInGame(client) && (botsValid || !IsFakeClient(client));
+    return (0 < client <= MaxClients) && IsClientInGame(client) && (botsValid || !IsFakeClient(client));
 }
 
 static void DrawSpeedHud(int player, int target) {
@@ -93,16 +93,16 @@ void DrawSpeedHudText(int client, float CurrentSpeed) {
 
 bool GetClientCookieBool(int client, Handle cookie)
 {
-	char sValue[8];
-	GetClientCookie(client, cookie, sValue, sizeof(sValue));
-	
-	return (sValue[0] != '\0' && StringToInt(sValue));
+    char sValue[8];
+    GetClientCookie(client, cookie, sValue, sizeof(sValue));
+
+    return (sValue[0] != '\0' && StringToInt(sValue));
 }
 
 void SetClientCookieBool(int client, Handle cookie, bool value)
 {
-	char sValue[8];
-	IntToString(value, sValue, sizeof(sValue));
-	
-	SetClientCookie(client, cookie, sValue);
+    char sValue[8];
+    IntToString(value, sValue, sizeof(sValue));
+
+    SetClientCookie(client, cookie, sValue);
 }
