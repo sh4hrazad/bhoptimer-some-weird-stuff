@@ -37,12 +37,11 @@ public void OnClientDisconnect_Post(int client) {
     g_QEInfo[client].iLastButtons = 0;
 }
 
-public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2]) {
-    if((Shavit_GetStyleSettingInt(Shavit_GetBhopStyle(client), "block_pleft") > 0
-        && Shavit_GetStyleSettingInt(Shavit_GetBhopStyle(client), "block_pright") > 0) // detect only when +left/+right not restricted based on timer
-        || Shavit_GetTimerStatus(client) != Timer_Running // detect only when player running
-        || Shavit_GetClientTime(client) == 0.0 // dont detect in start zone (if timer not running)
-        || Shavit_GetStyleSettingBool(Shavit_GetBhopStyle(client), "tas") /* dont check tas style */) {
+public Action Shavit_OnUserCmdPre(int client, int &buttons, int &impulse, float vel[3], float angles[3], TimerStatus status, int track, int style, int mouse[2]) {
+    if((Shavit_GetStyleSettingBool(style, "block_pleft")
+    && Shavit_GetStyleSettingBool(style, "block_pright")) // detect only when +left/+right not restricted based on timer
+    || Shavit_GetClientTime(client) == 0.0 // dont detect in start zone (if timer not running)
+    || Shavit_GetStyleSettingBool(style, "tas") /* dont check tas style */) {
             g_QEInfo[client].iQECount = 0;
 
             return Plugin_Continue;
@@ -52,8 +51,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
         if (!(g_QEInfo[client].iLastButtons & IN_LEFT)) {
             OnButtonPress(client, IN_LEFT);
         }
-    }
-    else if (buttons & IN_RIGHT) {
+    } else if (buttons & IN_RIGHT) {
         if (!(g_QEInfo[client].iLastButtons & IN_RIGHT)) {
             OnButtonPress(client, IN_RIGHT);
         }
@@ -78,18 +76,15 @@ public void OnButtonPress(int client, int button) {
             if (g_QEInfo[client].iQECount == 5) {
                 CPrintToChat(client, "{red}!!! {white}USING {lightgreen}+left{white}/{lightgreen}+right{white} TOO FREQUENTLY WILL RESULT IN TIMER STOPPED {red}!!!");
             }
-        }
-        else {
+        } else {
             QEStopTimer(client);
         }
-    }
-    else if (g_QEInfo[client].iQECount > 1) {
+    } else if (g_QEInfo[client].iQECount > 1) {
         g_QEInfo[client].iQECount--;
         CPrintToChat(client, "{white}%s detected. ({lightblue}%i{white}/{lightgreen}%i{white})",
             button == IN_LEFT ? "+left" : "+right",
             g_QEInfo[client].iQECount, 5);
-    }
-    else if (g_QEInfo[client].iQECount == 0) {
+    } else if (g_QEInfo[client].iQECount == 0) {
         g_QEInfo[client].iQECount++; // initialize
         CPrintToChat(client, "{white}%s detected. ({lightblue}%i{white}/{lightgreen}%i{white})",
             button == IN_LEFT ? "+left" : "+right", g_QEInfo[client].iQECount, 5);

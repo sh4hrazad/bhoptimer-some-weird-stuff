@@ -35,8 +35,7 @@ public Action Command_ShowSpeed(int client, int args) {
 		gB_ShowSpeed[client] = !gB_ShowSpeed[client];
 		SetClientCookieBool(client, gH_ShowSpeedCookie, gB_ShowSpeed[client]);
 		CReplyToCommand(client, "{white}Showspeed {lightgreen}%s{white}.", gB_ShowSpeed[client] ? "enabled" : "disabled");
-	}
-	else {
+	} else {
 		ReplyToCommand(client, "[SM] Invalid client!");
 	}
 	
@@ -44,12 +43,15 @@ public Action Command_ShowSpeed(int client, int args) {
 }
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2]) {
-    if (!gB_ShowSpeed[client]) return; // dont run when disabled
-    if (!IsValidClient(client, true)) return;
+    if (!gB_ShowSpeed[client])
+    	return; // dont run when disabled
+    if (!IsValidClient(client, true))
+    	return;
 
     int target = GetSpectatorTarget(client);
 
-    if (!IsFakeClient(client)) DrawSpeedHud(client, target);
+    if (!IsFakeClient(client))
+    	DrawSpeedHud(client, target);
 }
 
 int GetSpectatorTarget(int client) {
