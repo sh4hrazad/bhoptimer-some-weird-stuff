@@ -23,9 +23,9 @@ public void OnClientPutInServer(int client) {
 
 public Action Command_NoclipIgnoreTrigger(int client, int args) {
     if (client == 0) {
-		ReplyToCommand(client, "[SM] This command can only be used in-game.");
-		return Plugin_Handled;
-	}
+	ReplyToCommand(client, "[SM] This command can only be used in-game.");
+	return Plugin_Handled;
+    }
 
     gB_CanTouchTrigger[client] = !gB_CanTouchTrigger[client];
     CPrintToChat(client, "{white}Noclip trigger {lightgreen}%s{white}.", gB_CanTouchTrigger[client] ? "enabled" : "disabled");
@@ -53,9 +53,9 @@ public void OnEntityCreated(int entity, const char[] classname) {
 
 public Action HookTrigger(int entity, int other) {
     if (IsValidClient(other)) {
-		if (!gB_CanTouchTrigger[other] && GetEntityMoveType(other) & MOVETYPE_NOCLIP) {
-			return Plugin_Handled;
-		}
+	if (!gB_CanTouchTrigger[other] && GetEntityMoveType(other) & MOVETYPE_NOCLIP) {
+            return Plugin_Handled;
+	}
     }
 
     return Plugin_Continue;
