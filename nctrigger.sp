@@ -33,8 +33,7 @@ public Action Command_NoclipIgnoreTrigger(int client, int args) {
     return Plugin_Handled;
 }
 
-public void OnEntityCreated(int entity, const char[] classname)
-{
+public void OnEntityCreated(int entity, const char[] classname) {
 	if (StrEqual(classname, "trigger_apply_impulse")
     || StrEqual(classname, "trigger_capture_area")
     || StrEqual(classname, "trigger_catapult")
