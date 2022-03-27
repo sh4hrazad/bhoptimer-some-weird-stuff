@@ -27,7 +27,7 @@ public void OnPluginStart() {
 }
 
 public void OnClientCookiesCached(int client) {
-	gB_ShowSpeed[client] = GetClientCookieBool(client, gH_ShowSpeedCookie);
+    gB_ShowSpeed[client] = GetClientCookieBool(client, gH_ShowSpeedCookie);
 }
 
 public Action Command_ShowSpeed(int client, int args) {
