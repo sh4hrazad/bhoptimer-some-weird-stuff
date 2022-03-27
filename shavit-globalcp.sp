@@ -74,21 +74,21 @@ public void OnPluginEnd() {
 
 /* -- Commands -- */
 public Action Command_GlobalCheckpoints(int client, any args) {
-	if (client == 0) {
-		ReplyToCommand(client, "[SM] This command can only be used in-game.");
-		return Plugin_Handled;
-	}
-
-	OpenGlobalCheckpointsMenu(client);
-
+    if (client == 0) {
+	ReplyToCommand(client, "[SM] This command can only be used in-game.");
 	return Plugin_Handled;
+    }
+
+    OpenGlobalCheckpointsMenu(client);
+
+    return Plugin_Handled;
 }
 
 public Action Command_GetCheckpoint(int client, any args) {
     if (client == 0) {
     	ReplyToCommand(client, "[SM] This command can only be used in-game.");
     	return Plugin_Handled;
-	} else if (args < 1) {
+    } else if (args < 1) {
         CPrintToChat(client, "{white}Usage: sm_getcp #<{lightgreen}global cp num{white}>");
         return Plugin_Handled;
     }
@@ -111,8 +111,7 @@ public Action Command_GetCheckpoint(int client, any args) {
         int iSaveIndex = bOverflow ? iMaxCPs : Shavit_GetTotalCheckpoints(client);
 
         CPrintToChat(client, "{white}Checkpoint #{lightgreen}%d{white} -> #{lightgreen}%d{white} saved.",
-            iCPNumber,
-            iSaveIndex);
+            iCPNumber, iSaveIndex);
     }
 
     return Plugin_Handled;
@@ -196,10 +195,9 @@ public int MenuHandler_GlobalCheckpoints(Menu menu, MenuAction action, int param
             }
         }
         OpenGlobalCheckpointsMenu(param1, GetMenuSelectionPosition());
-        
     } else if (action == MenuAction_End) {
-		delete menu;
-	}
+        delete menu;
+    }
 
     return 0;
 }
@@ -236,7 +234,6 @@ bool TeleportToGlobalCheckpoint(int client, int index) {
     gA_GlobalCheckpoints.GetArray(index - 1, checkpoint, sizeof(checkpoint));
     
     Shavit_LoadCheckpointCache(client, checkpoint.cpcache, -1, sizeof(cp_cache_t));
-
     Shavit_ResumeTimer(client);
 
     return true;
@@ -268,13 +265,12 @@ public int GetMaxCPs(int client) {
 public void GetFormatedLapsedTime(int timestamp, int currentTime, char[] buffer, int size) {
     int iLapsedTime = currentTime - timestamp;
 
-    if (iLapsedTime < 10) {
+    if (iLapsedTime < 10)
         FormatEx(buffer, size, "Just now");
-    } else if (iLapsedTime >= 10 && iLapsedTime < 61) {
+    else if (iLapsedTime >= 10 && iLapsedTime < 61)
         FormatEx(buffer, size, "%d seconds ago", iLapsedTime);
-    } else if (iLapsedTime >= 61 && iLapsedTime < 3601) {
+    else if (iLapsedTime >= 61 && iLapsedTime < 3601)
         FormatEx(buffer, size, "%d %s ago", iLapsedTime / 60, iLapsedTime / 60 == 1 ? "minute" : "minutes");
-    } else {
+    else
         FormatEx(buffer, size, "long long ago...");
-    }
 }
