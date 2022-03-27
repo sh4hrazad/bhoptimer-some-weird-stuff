@@ -15,9 +15,9 @@ public Plugin myinfo = {
 float gF_DetectionTime = 1.5;
 
 enum struct QEInfo {
-	float fLastTime;
+    float fLastTime;
     int iLastButtons;
-	int iQECount;
+    int iQECount;
 }
 
 QEInfo g_QEInfo[MAXPLAYERS + 1];
@@ -42,10 +42,10 @@ public Action Shavit_OnUserCmdPre(int client, int &buttons, int &impulse, float 
     && Shavit_GetStyleSettingBool(style, "block_pright")) // detect only when +left/+right not restricted based on timer
     || Shavit_GetClientTime(client) == 0.0 // dont detect in start zone (if timer not running)
     || Shavit_GetStyleSettingBool(style, "tas") /* dont check tas style */) {
-            g_QEInfo[client].iQECount = 0;
+        g_QEInfo[client].iQECount = 0;
 
-            return Plugin_Continue;
-        }
+        return Plugin_Continue;
+    }
     
     if (buttons & IN_LEFT) {
         if (!(g_QEInfo[client].iLastButtons & IN_LEFT)) {
