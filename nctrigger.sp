@@ -34,7 +34,7 @@ public Action Command_NoclipIgnoreTrigger(int client, int args) {
 }
 
 public void OnEntityCreated(int entity, const char[] classname) {
-	if (StrEqual(classname, "trigger_apply_impulse")
+    if (StrEqual(classname, "trigger_apply_impulse")
     || StrEqual(classname, "trigger_capture_area")
     || StrEqual(classname, "trigger_catapult")
     || StrEqual(classname, "trigger_hurt")
@@ -45,10 +45,10 @@ public void OnEntityCreated(int entity, const char[] classname) {
     || StrEqual(classname, "trigger_push")
     || StrEqual(classname, "trigger_teleport") 
     || StrEqual(classname, "trigger_gravity")) {
-		SDKHook(entity, SDKHook_StartTouch, HookTrigger);
-		SDKHook(entity, SDKHook_EndTouch, HookTrigger);
-		SDKHook(entity, SDKHook_Touch, HookTrigger);
-	}
+        SDKHook(entity, SDKHook_StartTouch, HookTrigger);
+        SDKHook(entity, SDKHook_EndTouch, HookTrigger);
+        SDKHook(entity, SDKHook_Touch, HookTrigger);
+    }
 }
 
 public Action HookTrigger(int entity, int other) {
@@ -62,7 +62,7 @@ public Action HookTrigger(int entity, int other) {
 }
 
 bool IsValidClient(int client) {
-	return (client >= 1 
+    return (client >= 1 
         && client <= MaxClients 
         && IsClientConnected(client) 
         && IsClientInGame(client) 
