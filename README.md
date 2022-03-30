@@ -1,5 +1,6 @@
-    Watch .sp file if lack of includes that may be used.
+![](https://img.shields.io/github/license/sh4hrazad/bhoptimer-some-weird-stuff?style=flat-square) ![](https://img.shields.io/badge/neko%20fl4n-included-ff6a6a?style=flat-square) ![](https://img.shields.io/badge/neko%20brz-included-6aa6ff?style=flat-square)
 
+    Watch .sp file if lack of includes that may be used.
 # Plugin list:
 ## showspeed.sp:
 ### shows speed in the center without HUD conflict
