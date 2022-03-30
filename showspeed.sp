@@ -7,8 +7,8 @@
 
 public Plugin myinfo = {
 	name = "Show Speed",
-	author = "Shahrazad",
-};
+	author = "Shahrazad"
+}
 
 Handle gH_SpeedHUD = null;
 Handle gH_ShowSpeedCookie;
