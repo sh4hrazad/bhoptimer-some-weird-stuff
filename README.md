@@ -5,10 +5,12 @@
 
 # Plugin list:
 ## showspeed.sp:
-### a plugin that shows speed in the center without HUD conflict
+### shows speed in the center without HUD conflict
 ## nctrigger.sp:
-### a plugin toggle whether u can be affected by triggers
+### toggles whether u can be affected by triggers
 ## shavit-blockqestrafe.sp:
-### a plugin that stops a player's timer who strafes using `+left`/`+right` bind
+### stops a player's timer who strafes using `+left`/`+right` bind
 ## shavit-globalcp.sp:
-### a plugin that lists all players' checkpoint in a menu
+### lists all players' checkpoint in a menu
+## fuckZones-NoJump.sp
+### blocks a player from jumping in a zone that contains `nojump` in the zone's name(fuckZones plugin needed)
