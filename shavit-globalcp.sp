@@ -1,16 +1,16 @@
-// !!! Please make sure that your timer has been updated to 3.2.0 or higher, or stuff may break.
+// !!! Please make sure that your timer has been updated to 3.2.0 or higher, or stuff _WILL_ break.
 
 /* -- Includes -- */
 // base
 #include <sourcemod>
 
-// misc
-#include <multicolors>
-#include <sdktools>
-
 // bhoptimer
 #include <shavit/core>
 #include <shavit/checkpoints>
+
+// misc
+#include <multicolors>
+#include <sdktools>
 
 // coding rule
 #pragma newdecls required
@@ -70,10 +70,7 @@ public void OnClientDisconnect(int client) {
 }
 
 /* -- Prevent memory leak..?? -- */
-public void OnPluginEnd() {
-	// in case that someone re/unload the plugin?
-	delete gA_GlobalCheckpoints;
-}
+// nope temperarily 🥰
 
 /* -- Commands -- */
 public Action Command_GlobalCheckpoints(int client, any args) {
@@ -149,17 +146,23 @@ public Action Command_Saveloc(int client, any args) {
 
 		return Plugin_Handled;
 	} else if (Shavit_GetStyleSettingBool(Shavit_GetBhopStyle(client), "kzcheckpoints")) {
-		CPrintToChat(client, "{white}Customized CPs is {red}not{white} avaliable in KZ mode.");
+		CPrintToChat(client, "{white}This feature is {red}disabled{white} in KZ styles.");
 
 		return Plugin_Handled;
 	} else if (args < 1) {
 		int iIndex = Shavit_SaveCheckpoint(client);
-		if (iIndex)
-			CPrintToChat(client, "{white}Checkpoint #{lightgreen}%d{white} Saved.", Shavit_GetCurrentCheckpoint(client));
+		if (iIndex) {
+			cp_cache_t cpcache;
+			Shavit_GetCheckpoint(client, iIndex, cpcache);
 
+			char sSaveInfo[64];
+			GetCheckpointInfo(cpcache, sSaveInfo, sizeof(sSaveInfo));
+
+			CPrintToChat(client, "{white}Checkpoint #{lightgreen}%d{white} Saved.", Shavit_GetCurrentCheckpoint(client));
+			CPrintToChat(client, "{white}To {lightgreen}recreate{white} the checkpoint: sm_saveloc %s", sSaveInfo);
+		}
 		return Plugin_Handled;
 	}
-
 
 	char sArg[64];
 	GetCmdArg(1, sArg, sizeof(sArg));
@@ -196,6 +199,8 @@ void OpenGlobalCheckpointsMenu(int client, int item = 0) {
 		bIsFull ? "(FULL)" : "");
 	hMenu.AddItem("save", bIsSelected ? sInfo : "Save (Not selected)",
 		(bIsFull || !bIsSelected) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+
+	hMenu.AddItem("export", "Generate save command", bIsSelected ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 
 	hMenu.AddItem("cpmenu", "Open CP menu");
 
@@ -240,6 +245,14 @@ public int MenuHandler_GlobalCheckpoints(Menu menu, MenuAction action, int param
 
 		if (StrEqual(sInfo, "save")) {
 			SaveGlobalCheckpoint(param1, gI_CheckpointSelected[param1]);
+		} else if (StrEqual(sInfo, "export")) {
+			char sSaveInfo[64];
+
+			cp_cache_t cpcache;
+			Shavit_GetCheckpoint(param1, gI_CheckpointSelected[param1], cpcache);
+
+			GetCheckpointInfo(cpcache, sSaveInfo, sizeof(sSaveInfo));
+			CPrintToChat(param1, "{white}sm_saveloc %s", sSaveInfo);
 		} else if (StrEqual(sInfo, "cpmenu")) {
 			FakeClientCommandEx(param1, "sm_checkpoints");
 		} else if (StrEqual(sInfo, "refresh")) {
@@ -329,12 +342,10 @@ bool SaveGlobalCheckpoint(int client, int index) {
 }
 
 /* -- Save a customized checkpoint -- */
-// debug(on bhop_bfur): /saveloc 4190|1753|576|4|30|0|0|0|0
 int SaveLocation(int client, char sSavelocInfo[9][8]) {
 	int iStyle = Shavit_GetBhopStyle(client);
 	global_cp_cache_t checkpoint;
 
-	// put position, angles and velocity info into cpcache
 	for (int i = 0; i < 3; i++) {
 		checkpoint.cpcache.fPosition[i] = StringToFloat(sSavelocInfo[i]);
 		checkpoint.cpcache.fAngles[i] = StringToFloat(sSavelocInfo[i + 3]);
@@ -347,9 +358,10 @@ int SaveLocation(int client, char sSavelocInfo[9][8]) {
 
 	ScaleVector(checkpoint.cpcache.fVelocity, 1 / checkpoint.cpcache.fSpeed);
 
+	checkpoint.cpcache.iFlags = GetEntityFlags(client) & ~(FL_ATCONTROLS|FL_FAKECLIENT);
+
 	Shavit_SaveSnapshot(client, checkpoint.cpcache.aSnapshot);
 
-	// stop timer(if have)
 	checkpoint.cpcache.aSnapshot.bTimerEnabled = false;
 
 	Shavit_SetCheckpoint(client, -1, checkpoint.cpcache);
@@ -365,7 +377,7 @@ int SaveLocation(int client, char sSavelocInfo[9][8]) {
 	return Shavit_GetTotalCheckpoints(client);
 }
 
-/* -- Misc code -- */
+/* -- Miscellaneous code -- */
 int GetMaxCPs(int client) {
 	return Shavit_GetStyleSettingBool(Shavit_GetBhopStyle(client), "segments") ?
 		gCV_MaxCP_Segmented.IntValue : gCV_MaxCP.IntValue;
@@ -382,4 +394,16 @@ void GetFormatedLapsedTime(int timestamp, int currentTime, char[] buffer, int si
 		FormatEx(buffer, size, "%d %s ago", iLapsedTime / 60, iLapsedTime / 60 == 1 ? "minute" : "minutes");
 	else
 		FormatEx(buffer, size, "long long ago...");
+}
+
+void GetCheckpointInfo(cp_cache_t cpcache, char[] saveInfo, int size) {
+	char sSaveInfo[9][8];
+
+	for (int i = 0; i < 3; i++) {
+		IntToString(RoundToZero(cpcache.fPosition[i]), sSaveInfo[i], 8);
+		IntToString(RoundToZero(cpcache.fAngles[i]), sSaveInfo[i + 3], 8);
+		IntToString(RoundToZero(cpcache.fVelocity[i]), sSaveInfo[i + 6], 8);
+	}
+
+	ImplodeStrings(sSaveInfo, 9, "|", saveInfo, size);
 }
