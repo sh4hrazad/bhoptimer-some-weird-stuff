@@ -24,6 +24,7 @@ enum struct global_cp_cache_t {
 	int iSaveTime;
 }
 
+ConVar gCV_Checkpoints = null;
 ConVar gCV_MaxCP = null;
 ConVar gCV_MaxCP_Segmented = null;
 
@@ -34,11 +35,11 @@ int gI_CheckpointSelected[MAXPLAYERS + 1];
 
 /* -- Plugin Info -- */
 public Plugin myinfo = {
-	name        =       "[Shavit] Global Checkpoints",
-	author      =       "Shahrazad",
-	description =       "Show a menu that lists checkpoints that all players saved.",
-	version     =       SHAVIT_VERSION,
-};
+	name		=	"[shavit] Global Checkpoints",
+	author		=	"Shahrazad",
+	description	=	"Show a menu that lists checkpoints that all players saved.",
+	version		=	SHAVIT_VERSION
+}
 
 /* -- Initialization -- */
 public void OnPluginStart() {
@@ -47,7 +48,10 @@ public void OnPluginStart() {
 		"Show a menu that lists checkpoints that all players saved.");
 	RegConsoleCmd("sm_getcp", Command_GetCheckpoint,
 		"Copy a checkpoint to your menu from global cps menu. Usage: sm_getcp #<global cp num>");
-	
+	RegConsoleCmd("sm_saveloc", Command_Saveloc,
+		"Make a checkpoint. Usage: sm_saveloc posX|posY|posZ|angleX|angleY|angleZ|velX|velY|velZ");
+
+	gCV_Checkpoints = FindConVar("shavit_checkpoints_enabled");
 	gCV_MaxCP = FindConVar("shavit_checkpoints_maxcp");
 	gCV_MaxCP_Segmented = FindConVar("shavit_checkpoints_maxcp_seg");
 
@@ -75,6 +79,11 @@ public void OnPluginEnd() {
 public Action Command_GlobalCheckpoints(int client, any args) {
 	if (client == 0) {
 		ReplyToCommand(client, "[SM] This command can only be used in-game.");
+
+		return Plugin_Handled;
+	} else if (!gCV_Checkpoints.BoolValue) {
+		CPrintToChat(client, "{white}This feature is {red}disabled{white}.");
+
 		return Plugin_Handled;
 	}
 
@@ -86,9 +95,15 @@ public Action Command_GlobalCheckpoints(int client, any args) {
 public Action Command_GetCheckpoint(int client, any args) {
 	if (client == 0) {
 		ReplyToCommand(client, "[SM] This command can only be used in-game.");
+
+		return Plugin_Handled;
+	} else if (!gCV_Checkpoints.BoolValue) {
+		CPrintToChat(client, "{white}This feature is {red}disabled{white}.");
+
 		return Plugin_Handled;
 	} else if (args < 1) {
-		CPrintToChat(client, "{white}Usage: sm_getcp #<{lightgreen}global cp num{white}>");
+		CPrintToChat(client, "{white}Usage: sm_getcp <{lightgreen}global cp num{white}>");
+
 		return Plugin_Handled;
 	}
 
@@ -111,6 +126,54 @@ public Action Command_GetCheckpoint(int client, any args) {
 
 		CPrintToChat(client, "{white}Checkpoint #{lightgreen}%d{white} -> #{lightgreen}%d{white} saved.",
 			iCPNumber, iSaveIndex);
+	}
+
+	return Plugin_Handled;
+}
+
+public Action Command_Saveloc(int client, any args) {
+	if (client == 0) {
+		ReplyToCommand(client, "[SM] This command can only be used in-game.");
+
+		return Plugin_Handled;
+	} else if (!gCV_Checkpoints.BoolValue) {
+		CPrintToChat(client, "{white}This feature is {red}disabled{white}.");
+
+		return Plugin_Handled;
+	} else if(Shavit_IsPaused(client)) {
+		CPrintToChat(client, "{white}Your timer has to be {red}resumed{white} to use this command.");
+
+		return Plugin_Handled;
+	} else if (Shavit_GetTotalCheckpoints(client) == GetMaxCPs(client)) {
+		CPrintToChat(client, "{white}Can't save the checkpoint because your checkpoint list is {lightgreen}full{white}!");
+
+		return Plugin_Handled;
+	} else if (Shavit_GetStyleSettingBool(Shavit_GetBhopStyle(client), "kzcheckpoints")) {
+		CPrintToChat(client, "{white}Customized CPs is {red}not{white} avaliable in KZ mode.");
+
+		return Plugin_Handled;
+	} else if (args < 1) {
+		int iIndex = Shavit_SaveCheckpoint(client);
+		if (iIndex)
+			CPrintToChat(client, "{white}Checkpoint #{lightgreen}%d{white} Saved.", Shavit_GetCurrentCheckpoint(client));
+
+		return Plugin_Handled;
+	}
+
+
+	char sArg[64];
+	GetCmdArg(1, sArg, sizeof(sArg));
+
+	char sSavelocInfo[9][8];
+	if (ExplodeString(sArg, "|", sSavelocInfo, 9, 8) != 9) {
+		CPrintToChat(client, "{white}Invalid checkpoint info.");
+
+		return Plugin_Handled;
+	}
+
+	if (SaveLocation(client, sSavelocInfo)) {
+		CPrintToChat(client, "{white}Checkpoint #{lightgreen}%d{white} Saved.", Shavit_GetCurrentCheckpoint(client));
+		CPrintToChat(client, "{white}To {lightgreen}recreate{white} the checkpoint: sm_saveloc %s", sArg);
 	}
 
 	return Plugin_Handled;
@@ -206,7 +269,7 @@ public void Shavit_OnCheckpointCacheSaved(int client, cp_cache_t cache, int inde
 	global_cp_cache_t checkpoint;
 	checkpoint.cpcache = cache;
 
-	// refered to Shavit_SetCheckpoint()
+	// clone handles
 	if (cache.aFrames)
 		checkpoint.cpcache.aFrames = cache.aFrames.Clone();
 	if (cache.aEvents)
@@ -229,6 +292,12 @@ public void Shavit_OnCheckpointCacheSaved(int client, cp_cache_t cache, int inde
 
 /* -- Teleport the player to the global checkpoint that is selected -- */
 bool TeleportToGlobalCheckpoint(int client, int index) {
+	if (Shavit_IsPaused(client)) {
+		CPrintToChat(client, "{white}Your timer has to be {red}resumed{white} to use this command.");
+
+		return false;
+	}
+
 	global_cp_cache_t checkpoint;
 	gA_GlobalCheckpoints.GetArray(index - 1, checkpoint, sizeof(checkpoint));
 	
@@ -240,7 +309,11 @@ bool TeleportToGlobalCheckpoint(int client, int index) {
 
 /* -- Save the global checkpoint to the client's checkpoint menu -- */
 bool SaveGlobalCheckpoint(int client, int index) {
-	if (Shavit_GetTotalCheckpoints(client) == GetMaxCPs(client)) {
+	if (Shavit_IsPaused(client)) {
+		CPrintToChat(client, "{white}Your timer has to be {red}resumed{white} to use this command.");
+
+		return false;
+	} else if (Shavit_GetTotalCheckpoints(client) == GetMaxCPs(client)) {
 		CPrintToChat(client, "{white}Can't save the checkpoint because your checkpoint list is {lightgreen}full{white}!");
 
 		return false;
@@ -255,13 +328,50 @@ bool SaveGlobalCheckpoint(int client, int index) {
 	return true;
 }
 
+/* -- Save a customized checkpoint -- */
+// debug(on bhop_bfur): /saveloc 4190|1753|576|4|30|0|0|0|0
+int SaveLocation(int client, char sSavelocInfo[9][8]) {
+	int iStyle = Shavit_GetBhopStyle(client);
+	global_cp_cache_t checkpoint;
+
+	// put position, angles and velocity info into cpcache
+	for (int i = 0; i < 3; i++) {
+		checkpoint.cpcache.fPosition[i] = StringToFloat(sSavelocInfo[i]);
+		checkpoint.cpcache.fAngles[i] = StringToFloat(sSavelocInfo[i + 3]);
+		checkpoint.cpcache.fVelocity[i] = StringToFloat(sSavelocInfo[i + 6]);
+	}
+	
+	checkpoint.cpcache.iMoveType = MOVETYPE_WALK;
+	checkpoint.cpcache.fGravity = Shavit_GetStyleSettingFloat(iStyle, "gravity");
+	checkpoint.cpcache.fSpeed = Shavit_GetStyleSettingFloat(iStyle, "timescale") * Shavit_GetStyleSettingFloat(iStyle, "speed");
+
+	ScaleVector(checkpoint.cpcache.fVelocity, 1 / checkpoint.cpcache.fSpeed);
+
+	Shavit_SaveSnapshot(client, checkpoint.cpcache.aSnapshot);
+
+	// stop timer(if have)
+	checkpoint.cpcache.aSnapshot.bTimerEnabled = false;
+
+	Shavit_SetCheckpoint(client, -1, checkpoint.cpcache);
+	Shavit_SetCurrentCheckpoint(client, Shavit_GetTotalCheckpoints(client));
+
+	GetClientName(client, checkpoint.sPlayerName, sizeof(checkpoint.sPlayerName));
+	checkpoint.iCheckpointNumber = gI_CheckpointsSaved + 1;
+	checkpoint.iSaveTime = GetTime();
+
+	gA_GlobalCheckpoints.PushArray(checkpoint);
+	gI_CheckpointsSaved++;
+
+	return Shavit_GetTotalCheckpoints(client);
+}
+
 /* -- Misc code -- */
-public int GetMaxCPs(int client) {
+int GetMaxCPs(int client) {
 	return Shavit_GetStyleSettingBool(Shavit_GetBhopStyle(client), "segments") ?
 		gCV_MaxCP_Segmented.IntValue : gCV_MaxCP.IntValue;
 }
 
-public void GetFormatedLapsedTime(int timestamp, int currentTime, char[] buffer, int size) {
+void GetFormatedLapsedTime(int timestamp, int currentTime, char[] buffer, int size) {
 	int iLapsedTime = currentTime - timestamp;
 
 	if (iLapsedTime < 10)
