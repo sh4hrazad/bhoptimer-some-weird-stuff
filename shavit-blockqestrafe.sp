@@ -9,7 +9,7 @@
 public Plugin myinfo = {
 	name = "[Shavit] Q/E strafe detector",
 	author = "Shahrazad",
-	description = "stop a player's timer who strafes using Q/E"
+	description = "stop a player's timer who strafes using Q/E (that's so fking OP!)"
 };
 
 float gF_DetectionTime = 1.5;
