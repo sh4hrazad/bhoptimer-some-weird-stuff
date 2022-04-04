@@ -72,7 +72,7 @@ bool IsValidClient(int client, bool botsValid = false) {
 	return (0 < client <= MaxClients) && IsClientInGame(client) && (botsValid || !IsFakeClient(client));
 }
 
-static void DrawSpeedHud(int player, int target) {
+void DrawSpeedHud(int player, int target) {
 	float fSpeed[3];
 	GetEntPropVector(target, Prop_Data, "m_vecVelocity", fSpeed);
 
