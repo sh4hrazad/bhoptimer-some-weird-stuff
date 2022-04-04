@@ -7,6 +7,6 @@
 ## shavit-blockqestrafe.sp:
 ### stops a player's timer who strafes using `+left`/`+right` bind
 ## shavit-globalcp.sp:
-### lists all players' checkpoint in a menu
+### moved to https://github.com/sh4hrazad/shavit-globalcp
 ## fuckZones-NoJump.sp
 ### blocks a player from jumping in a zone that contains `nojump` in the zone's name(fuckZones plugin needed)
