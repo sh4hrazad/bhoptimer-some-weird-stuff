@@ -103,9 +103,14 @@ void ResponseBodyCallback(const char[] data, DataPack dataPack, int dataLen) {
 	g_Hitokoto.id = json_Sentence.GetInt("id");
 	json_Sentence.GetString("hitokoto", g_Hitokoto.hitokoto, sizeof(g_Hitokoto.hitokoto));
 	json_Sentence.GetString("type", g_Hitokoto.type, sizeof(g_Hitokoto.type));
-	json_Sentence.GetString("from", g_Hitokoto.from, sizeof(g_Hitokoto.from));
-	json_Sentence.GetString("from_who", g_Hitokoto.from_who, sizeof(g_Hitokoto.from_who));
-	json_Sentence.GetString("creator", g_Hitokoto.creator, sizeof(g_Hitokoto.creator));
+
+	if (!json_Sentence.GetString("from", g_Hitokoto.from, sizeof(g_Hitokoto.from)))
+		g_Hitokoto.from = "";
+	if (!json_Sentence.GetString("from_who", g_Hitokoto.from_who, sizeof(g_Hitokoto.from_who)))
+		g_Hitokoto.from_who = "";
+	if (!json_Sentence.GetString("creator", g_Hitokoto.creator, sizeof(g_Hitokoto.creator)))
+		g_Hitokoto.creator = "";
+
 	json_Sentence.GetString("date", g_Hitokoto.date, sizeof(g_Hitokoto.date));
 
 	delete json_Sentence;
@@ -113,5 +118,5 @@ void ResponseBodyCallback(const char[] data, DataPack dataPack, int dataLen) {
 	// 『*句子』
 	// 		—— 作者『出处』
 	CPrintToChat(client, "{white}『 {lightgreen}%s {white}』", g_Hitokoto.hitokoto);
-	CPrintToChat(client, "                        {white}—— {green}%s{white}『{lightgreen}%s{white}』", g_Hitokoto.from_who, g_Hitokoto.from);
+	CPrintToChat(client, "                                     {white}—— {brz}%s{white}「{fl4n}%s{white}」", g_Hitokoto.from_who, g_Hitokoto.from);
 }
