@@ -118,5 +118,5 @@ void ResponseBodyCallback(const char[] data, DataPack dataPack, int dataLen) {
 	// 『*句子』
 	// 		—— 作者『出处』
 	CPrintToChat(client, "{white}『 {lightgreen}%s {white}』", g_Hitokoto.hitokoto);
-	CPrintToChat(client, "                                     {white}—— {brz}%s{white}「{fl4n}%s{white}」", g_Hitokoto.from_who, g_Hitokoto.from);
+	CPrintToChat(client, "                                     {white}—— {lightgreen}%s{white}「{lightgreen}%s{white}」", g_Hitokoto.from_who, g_Hitokoto.from);
 }
