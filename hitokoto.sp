@@ -30,7 +30,7 @@ public Plugin myinfo = {
 }
 
 public void OnPluginStart() {
-	gCV_HitokotoAPIUrl = new Convar("hitokoto_api_url", "https://v1.hitokoto.cn/", "Url of Hitokoto's API\nRead https://developer.g_Hitokoto.cn/sentence/ for usage.\nShould leave it as default usually.", FCVAR_PROTECTED);
+	gCV_HitokotoAPIUrl = new Convar("hitokoto_api_url", "https://v1.hitokoto.cn/", "Url of Hitokoto's API\nRead https://developer.hitokoto.cn/sentence/ for usage.\nShould leave it as default usually.", FCVAR_PROTECTED);
 
 	Convar.AutoExecConfig();
 
@@ -118,5 +118,5 @@ void ResponseBodyCallback(const char[] data, DataPack dataPack, int dataLen) {
 	// 『*句子』
 	// 		—— 作者『出处』
 	CPrintToChat(client, "{white}『 {lightgreen}%s {white}』", g_Hitokoto.hitokoto);
-	CPrintToChat(client, "                                     {white}—— {brz}%s{white}「{fl4n}%s{white}」", g_Hitokoto.from_who, g_Hitokoto.from);
+	CPrintToChat(client, "                                     {white}—— {lightgreen}%s{white}「{lightgreen}%s{white}」", g_Hitokoto.from_who, g_Hitokoto.from);
 }
