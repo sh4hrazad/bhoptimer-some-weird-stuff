@@ -44,6 +44,7 @@ Action Command_Hitokoto(int client, int args) {
 }
 
 public void OnClientPutInServer(int client) {
+	// maybe better to use GetClientSerial() and GetClientFromSerial()
 	if (IsValidClient(client)) {
 		GetSentence(client);
 	}
