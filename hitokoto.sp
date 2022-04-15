@@ -44,18 +44,16 @@ Action Command_Hitokoto(int client, int args) {
 }
 
 public void OnClientPutInServer(int client) {
-	// maybe better to use GetClientSerial() and GetClientFromSerial()
 	if (IsValidClient(client)) {
-		GetSentence(client);
+		GetSentence(GetClientSerial(client));
 	}
 }
 
-bool IsValidClient(int client, bool botsValid = false) {
-	return (0 < client <= MaxClients) && IsClientInGame(client) && (botsValid || !IsFakeClient(client));
+bool IsValidClient(int client) {
+	return (0 < client <= MaxClients) && IsClientInGame(client) && !IsFakeClient(client);
 }
 
-void GetSentence(int client) {
-	int iSerial = GetClientSerial(client);
+void GetSentence(int serial) {
 	char sApiUrl[256];
 
 	if (!gCV_HitokotoAPIUrl.GetString(sApiUrl, sizeof(sApiUrl))) {
@@ -65,7 +63,7 @@ void GetSentence(int client) {
 	}
 
 	DataPack dp = new DataPack();
-	dp.WriteCell(iSerial);
+	dp.WriteCell(serial);
 
 	Handle hRequest;
 	if (!(hRequest = SteamWorks_CreateHTTPRequest(k_EHTTPMethodGET, sApiUrl))
@@ -98,6 +96,10 @@ void ResponseBodyCallback(const char[] data, DataPack dataPack, int dataLen) {
 	dataPack.Reset();
 	int client = GetClientFromSerial(dataPack.ReadCell());
 	CloseHandle(dataPack);
+
+	if (client == 0) {
+		return; // invalid client
+	}
 
 	JSON_Object json_Sentence = json_decode(data);
 
