@@ -39,7 +39,7 @@ public void OnPluginStart() {
 
 Action Command_Hitokoto(int client, int args) {
 	if (IsValidClient(client)) {
-		GetSentence(client);
+		GetSentence(GetClientSerial(client));
 	}
 }
 
