@@ -9,7 +9,12 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-Convar gCV_HitokotoAPIUrl = null;
+#define HITOKOTO_API "https://v1.hitokoto.cn/"
+#define HITOKOTO_PLAYER_REF ""
+#define HITOKOTO_HOSTNAME_REF "?max_length=10&c=i"
+#define FOR_HOSTNAME -1
+
+ConVar gCV_Hostname = null;
 
 enum struct HitokotoInfo {
 	int id;
@@ -26,18 +31,20 @@ HitokotoInfo g_Hitokoto;
 public Plugin myinfo = {
 	name = "Hitokoto: Source",
 	author = "Shahrazad",
-	description = "Grab proverbs or sentences from Hitokoto's API"
+	description = "Grab proverbs or sentences from Hitokoto's API for players and server's hostname"
 }
 
 public void OnPluginStart() {
-	gCV_HitokotoAPIUrl = new Convar("hitokoto_api_url", "https://v1.hitokoto.cn/", "Url of Hitokoto's API\nRead https://developer.hitokoto.cn/sentence/ for usage.\nShould leave it as default usually.", FCVAR_PROTECTED);
-
-	Convar.AutoExecConfig();
+	gCV_Hostname = FindConVar("hostname");
 
 	RegConsoleCmd("sm_hitokoto", Command_Hitokoto, "Print a sentence in the chat box.");
 }
 
-Action Command_Hitokoto(int client, int args) {
+public void OnMapStart() {
+	GetSentence(FOR_HOSTNAME);
+}
+
+public Action Command_Hitokoto(int client, int args) {
 	if (IsValidClient(client)) {
 		GetSentence(GetClientSerial(client));
 	}
@@ -55,11 +62,12 @@ bool IsValidClient(int client) {
 
 void GetSentence(int serial) {
 	char sApiUrl[256];
+	StrCat(sApiUrl, sizeof(sApiUrl), HITOKOTO_API);
 
-	if (!gCV_HitokotoAPIUrl.GetString(sApiUrl, sizeof(sApiUrl))) {
-		PrintToServer("Hitokoto: API Url is not set.");
-
-		return;
+	if (serial != FOR_HOSTNAME) {
+		StrCat(sApiUrl, sizeof(sApiUrl), HITOKOTO_PLAYER_REF);
+	} else {
+		StrCat(sApiUrl, sizeof(sApiUrl), HITOKOTO_HOSTNAME_REF);
 	}
 
 	DataPack dp = new DataPack();
@@ -94,7 +102,10 @@ public void RequestCompletedCallback(Handle request, bool failure, bool requestS
 
 void ResponseBodyCallback(const char[] data, DataPack dataPack, int dataLen) {
 	dataPack.Reset();
-	int client = GetClientFromSerial(dataPack.ReadCell());
+	int client = dataPack.ReadCell();
+	if (client != FOR_HOSTNAME) {
+		client = GetClientFromSerial(client);
+	}
 	CloseHandle(dataPack);
 
 	if (client == 0) {
@@ -118,8 +129,16 @@ void ResponseBodyCallback(const char[] data, DataPack dataPack, int dataLen) {
 
 	delete json_Sentence;
 
-	// 『*句子』
-	// 		—— 作者『出处』
-	CPrintToChat(client, "{white}『 {lightgreen}%s {white}』", g_Hitokoto.hitokoto);
-	CPrintToChat(client, "                                     {white}—— {lightgreen}%s{white}「{lightgreen}%s{white}」", g_Hitokoto.from_who, g_Hitokoto.from);
+	if (client != FOR_HOSTNAME) {
+		// 『*句子』
+		// 		—— 作者『出处』
+		CPrintToChat(client, "{white}『 {lightgreen}%s {white}』", g_Hitokoto.hitokoto);
+		CPrintToChat(client, "                                     {white}—— {lightgreen}%s{white}「{lightgreen}%s{white}」", g_Hitokoto.from_who, g_Hitokoto.from);
+	} else {
+		char sHostname[64];
+		GetConVarString(gCV_Hostname, sHostname, sizeof(sHostname));
+
+		FormatEx(sHostname, sizeof(sHostname), "%s 「%s」", sHostname, g_Hitokoto.hitokoto);
+		SetConVarString(gCV_Hostname, sHostname);
+	}
 }
