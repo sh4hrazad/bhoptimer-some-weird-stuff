@@ -1,3 +1,7 @@
+/**
+ * A lite version of zspeed.sp
+ */
+
 #include <sourcemod>
 #include <multicolors>
 #include <clientprefs>

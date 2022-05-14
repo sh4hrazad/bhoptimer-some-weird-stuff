@@ -1,3 +1,9 @@
+/**
+ * !nctriggers (surftimer feature)
+ *
+ * Original: https://github.com/surftimer/SurfTimer
+ */
+
 #include <sourcemod>
 #include <sdkhooks>
 #include <multicolors>

@@ -1,3 +1,7 @@
+/**
+ * Don't let players jump in the zones having "nojump" in its name.
+ */
+
 #include <sourcemod>
 #include <fuckZones>
 #include <multicolors>

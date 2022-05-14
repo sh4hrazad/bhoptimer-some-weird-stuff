@@ -26,8 +26,7 @@ public void OnPluginStart() {
 	// do nothing maybe
 }
 
-public void OnClientPutInServer(int client)
-{
+public void OnClientPutInServer(int client) {
 	g_QEInfo[client].fLastTime = 0.0;
 	g_QEInfo[client].iLastButtons = 0;
 	g_QEInfo[client].iQECount = 0;
@@ -38,10 +37,12 @@ public void OnClientDisconnect_Post(int client) {
 }
 
 public Action Shavit_OnUserCmdPre(int client, int &buttons, int &impulse, float vel[3], float angles[3], TimerStatus status, int track, int style, int mouse[2]) {
-	if((Shavit_GetStyleSettingBool(style, "block_pleft")
-	&& Shavit_GetStyleSettingBool(style, "block_pright")) // detect only when +left/+right not restricted based on timer
-	|| Shavit_GetClientTime(client) == 0.0 // dont detect in start zone (if timer not running)
-	|| Shavit_GetStyleSettingBool(style, "tas") /* dont check tas style */) {
+	if(
+		(Shavit_GetStyleSettingBool(style, "block_pleft")
+		 && Shavit_GetStyleSettingBool(style, "block_pright")) // detect only when +left/+right not restricted based on timer
+		 || Shavit_GetClientTime(client) == 0.0 // dont detect in start zone (if timer not running)
+		 || Shavit_GetStyleSettingBool(style, "tas") /* dont check tas style */
+	) {
 		g_QEInfo[client].iQECount = 0;
 
 		return Plugin_Continue;
@@ -67,10 +68,14 @@ public void OnButtonPress(int client, int button) {
 	if (g_QEInfo[client].fLastTime >= curTime) {
 		if (g_QEInfo[client].iQECount < 5) {
 			g_QEInfo[client].iQECount++;
-			CPrintToChat(client, "{white}%s detected. (%s%i{white}/{lightgreen}%i{white})",
-			button == IN_LEFT ? "+left" : "+right",
-			g_QEInfo[client].iQECount == 5 ? "{red}" : "{lightblue}",
-			g_QEInfo[client].iQECount, 5);
+
+			CPrintToChat(
+				client, "{white}%s detected. (%s%i{white}/{lightgreen}%i{white})",
+				button == IN_LEFT ? "+left" : "+right",
+				g_QEInfo[client].iQECount == 5 ? "{red}" : "{lightblue}",
+				g_QEInfo[client].iQECount, 5
+			);
+
 			if (g_QEInfo[client].iQECount == 5) {
 				CPrintToChat(client, "{red}!!! {white}USING {lightgreen}+left{white}/{lightgreen}+right{white} TOO FREQUENTLY WILL RESULT IN TIMER STOPPED {red}!!!");
 			}
@@ -79,13 +84,20 @@ public void OnButtonPress(int client, int button) {
 		}
 	} else if (g_QEInfo[client].iQECount > 1) {
 		g_QEInfo[client].iQECount--;
-		CPrintToChat(client, "{white}%s detected. ({lightblue}%i{white}/{lightgreen}%i{white})",
-		button == IN_LEFT ? "+left" : "+right",
-		g_QEInfo[client].iQECount, 5);
+
+		CPrintToChat(
+			client, "{white}%s detected. ({lightblue}%i{white}/{lightgreen}%i{white})",
+			button == IN_LEFT ? "+left" : "+right",
+			g_QEInfo[client].iQECount, 5
+		);
 	} else if (g_QEInfo[client].iQECount == 0) {
 		g_QEInfo[client].iQECount++; // initialize
-		CPrintToChat(client, "{white}%s detected. ({lightblue}%i{white}/{lightgreen}%i{white})",
-		button == IN_LEFT ? "+left" : "+right", g_QEInfo[client].iQECount, 5);
+		
+		CPrintToChat(
+			client, "{white}%s detected. ({lightblue}%i{white}/{lightgreen}%i{white})",
+			button == IN_LEFT ? "+left" : "+right",
+			g_QEInfo[client].iQECount, 5
+		);
 	}
 
 	g_QEInfo[client].fLastTime = newTime;
