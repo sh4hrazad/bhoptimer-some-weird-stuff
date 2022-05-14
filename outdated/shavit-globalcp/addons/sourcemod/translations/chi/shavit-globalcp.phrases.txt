@@ -1,0 +1,96 @@
+"Phrases"
+{
+	"GCPFeatureDisabled"
+	{
+		"chi"		"{white}该功能已被{red}禁用{white}."
+	}
+	"GCPNotFound"
+	{
+		"#format"	"{1:d}"
+		"chi"		"{white}存点 #{lightgreen}{1}{red} 不存在{white}."
+	}
+	"GCPCopied"
+	{
+		"#format"	"{1:d},{2:d}"
+		"chi"		"{white}存点 #{lightgreen}{1}{white} -> #{lightgreen}{2}{white} 已保存."
+	}
+	"GCPTimerResume"
+	{
+		"chi"		"{lightgreen}暂停计时{white}时{red}不得{white}存点."
+	}
+	"GCPFull"
+	{
+		"chi"		"{red}无法{white}存点, 你的存点列表{lightgreen}已满{white}!"
+	}
+	"GCPSaved"
+	{
+		"#format"	"{1:d}"
+		"chi"		"{white}存点 #{lightgreen}{1}{white} 已保存."
+	}
+	"GCPBlockKZ"
+	{
+		"chi"		"{white}该功能在 KZ 存点模式中{red}禁用{white}."
+	}
+	"GCPInvalid"
+	{
+		"chi"		"{white}无效的存点信息."
+	}
+	"GCPRecreate"
+	{
+		"#format"	"{1:s}"
+		"chi"		"{white}如需{lightgreen}复刻{white}存点请输入: sm_saveloc {1}"
+	}
+	// 菜单类翻译
+	// 请不要在这些翻译里面加颜色标签
+	"GCPMenuTitle"
+	{
+		"chi"		"使用他人存点\n!!! 读点会中止计时\n "
+	}
+	"GCPMenuSave"
+	{
+		"chi"		"复制"
+	}
+	"GCPMenuFull"
+	{
+		"chi"		"(已满)"
+	}
+	"GCPMenuRecreate"
+	{
+		"chi"		"生成复刻指令"
+	}
+	"GCPMenuOpenMenu"
+	{
+		"chi"		"打开存点菜单"
+	}
+	"GCPMenuRefresh"
+	{
+		"chi"		"刷新"
+	}
+	"GCPMenuNothing"
+	{
+		"chi"		"暂无存点"
+	}
+	"GCPMenuJustNow"
+	{
+		"chi"		"刚刚"
+	}
+	"GCPMenuSecondsAgo"
+	{
+		"#format"	"{1:d}"
+		"chi"		"{1} 秒前"
+	}
+	"GCPMenuMinutesAgo"
+	{
+		"#format"	"{1:d}"
+		"chi"		"{1} 分钟前"
+	}
+	"GCPMenuMinuteAgo"
+	{
+		"#format"	"{1:d}"
+		"chi"		"{1} 分钟前"
+	}
+	"GCPMenuLongLongAgo"
+	{
+		"chi"		"很久以前..."
+	}
+}

@@ -1,0 +1,96 @@
+"Phrases"
+{
+	"GCPFeatureDisabled"
+	{
+		"en"		"{white}This feature is {red}disabled{white}."
+	}
+	"GCPNotFound"
+	{
+		"#format"	"{1:d}"
+		"en"		"{white}Checkpoint #{lightgreen}{1}{white} not found."
+	}
+	"GCPCopied"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"{white}Checkpoint #{lightgreen}{1}{white} -> #{lightgreen}{2}{white} saved."
+	}
+	"GCPTimerResume"
+	{
+		"en"		"{white}Your timer has to be {red}resumed{white} to use this command."
+	}
+	"GCPFull"
+	{
+		"en"		"{white}Can't save the checkpoint because your checkpoint list is {lightgreen}full{white}!"
+	}
+	"GCPSaved"
+	{
+		"#format"	"{1:d}"
+		"en"		"{white}Checkpoint #{lightgreen}{1}{white} Saved."
+	}
+	"GCPBlockKZ"
+	{
+		"en"		"{white}This feature is {red}disabled{white} in KZ styles."
+	}
+	"GCPInvalid"
+	{
+		"en"		"{white}Invalid checkpoint info."
+	}
+	"GCPRecreate"
+	{
+		"#format"	"{1:s}"
+		"en"		"{white}To {lightgreen}recreate{white} the checkpoint: sm_saveloc {1}"
+	}
+	// Menu translations
+	// Please do not add color tags to them.
+	"GCPMenuTitle"
+	{
+		"en"		"Choose a checkpoint to teleport\n!!! Timer will be stopped if teleporting.\n "
+	}
+	"GCPMenuSave"
+	{
+		"en"		"Save"
+	}
+	"GCPMenuFull"
+	{
+		"en"		"(Full)"
+	}
+	"GCPMenuRecreate"
+	{
+		"en"		"Generate save command"
+	}
+	"GCPMenuOpenMenu"
+	{
+		"en"		"Open CP Menu"
+	}
+	"GCPMenuRefresh"
+	{
+		"en"		"Refresh"
+	}
+	"GCPMenuNothing"
+	{
+		"en"		"Nothing temporarily"
+	}
+	"GCPMenuJustNow"
+	{
+		"en"		"Just now"
+	}
+	"GCPMenuSecondsAgo"
+	{
+		"#format"	"{1:d}"
+		"en"		"{1} seconds ago"
+	}
+	"GCPMenuMinutesAgo"
+	{
+		"#format"	"{1:d}"
+		"en"		"{1} minutes ago"
+	}
+	"GCPMenuMinuteAgo"
+	{
+		"#format"	"{1:d}"
+		"en"		"{1} minute ago"
+	}
+	"GCPMenuLongLongAgo"
+	{
+		"en"		"long long ago..."
+	}
+}
