@@ -297,7 +297,7 @@ public Action OnPlayerRunCmd(
 	float fSpeed[3];
 	GetEntPropVector(iTarget, Prop_Data, "m_vecVelocity", fSpeed);
 
-	bool bTrueVel = view_as<bool>(Shavit_GetHUDSettings(client) & HUD_2DVEL);
+	bool bTrueVel = !view_as<bool>(Shavit_GetHUDSettings(client) & HUD_2DVEL);
 
 	char sBuffer[HUD_BUF_SIZE];
 
