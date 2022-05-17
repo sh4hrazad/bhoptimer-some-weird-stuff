@@ -8,14 +8,21 @@ public Plugin myinfo = {
 /* ---------- TOO LAZY TO ADD CONVARS FOR THEM ---------- */
 
 /**
- * HUD's refresh rate.
- * Note: Should not be too small or your server will be laggy.
+ * HUD 刷新率 (recommended: 5/3 (100/66 tick))
+ * 注意不要设置得太低, 否则会卡.
  */
-#define TICKS_PER_UPDATE 3
+#define TICKS_PER_UPDATE 5
 
 /**
- * Dynamic colors.
- * 
+ * HUD 单次刷新后持续时间 (default: 0.1)
+ * 如果服务器 HudText 占用多, 容易导致冲突, 可尝试调低些, 太低 HUD 会闪烁.
+ * 如果是 66/64 tick, 建议持续时间不要低于 0.5s.
+ */
+#define HUD_HOLD_TIME 0.1
+
+/**
+ * 动态 HUD 显示颜色 (default: {0, 180, 255}, {255, 90, 0})
+ * 动态 HUD 功能关闭时将使用 COLOR_INC 所设置的颜色.
  */
 #define COLOR_INC 	{0, 180, 255}
 #define COLOR_DEC 	{255, 90, 0}
@@ -322,7 +329,7 @@ void DrawMainSpeedHUD(int client, float vel[3], char[] buffer, bool trueVel) {
 
 	SetHudTextParams(
 		Settings[client].position[AXIS_X], Settings[client].position[AXIS_Y],
-		0.5, iColor[0], iColor[1], iColor[2], 255, 0, 1.0, 0.0, 0.0
+		HUD_HOLD_TIME, iColor[0], iColor[1], iColor[2], 255, 0, 1.0, 0.0, 0.0
 	);
 	Format(buffer, HUD_BUF_SIZE, "%d", RoundToFloor(fCurrentSpeed));
 	ShowHudText(client, GetDynamicChannel(0), "%s", buffer);
@@ -343,7 +350,7 @@ void DrawSpeedDiffHUD(int client, char[] buffer, bool trueVel) {
 	SetHudTextParams(
 		Settings[client].position[AXIS_X],
 		Settings[client].position[AXIS_Y] == POSITION_CENTER ? 0.52 : Settings[client].position[AXIS_Y] + 0.03,
-		0.5, iColor[0], iColor[1], iColor[2], 255, 0, 1.0, 0.0, 0.0
+		HUD_HOLD_TIME, iColor[0], iColor[1], iColor[2], 255, 0, 1.0, 0.0, 0.0
 	);
 	Format(buffer, HUD_BUF_SIZE, "%d", RoundToFloor(fDiff));
 	ShowHudText(client, GetDynamicChannel(1), "(%s%s)", (fDiff >= 0.0) ? "+" : "", buffer);
