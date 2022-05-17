@@ -1,5 +1,11 @@
 #include <sourcemod>
 
+public Plugin myinfo = {
+	name = "Hitokoto: Source",
+	author = "Shahrazad",
+	description = "Grab proverbs or sentences from Hitokoto's API for players and server's hostname"
+}
+
 #include <json>
 #include <steamworks>
 
@@ -19,7 +25,7 @@ ConVar gCV_Hostname = null;
 enum struct HitokotoInfo {
 	int id;
 	char hitokoto[512];	// Sentence content
-	char type[1];		// Sentence type
+	char type[4];		// Sentence type
 	char from[32];
 	char from_who[32];		
 	char creator[32];
@@ -27,12 +33,6 @@ enum struct HitokotoInfo {
 }
 
 HitokotoInfo g_Hitokoto;
-
-public Plugin myinfo = {
-	name = "Hitokoto: Source",
-	author = "Shahrazad",
-	description = "Grab proverbs or sentences from Hitokoto's API for players and server's hostname"
-}
 
 public void OnPluginStart() {
 	gCV_Hostname = FindConVar("hostname");
