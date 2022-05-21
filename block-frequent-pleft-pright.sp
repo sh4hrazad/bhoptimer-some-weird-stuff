@@ -45,27 +45,31 @@ void CleanUp(int client) {
 	g_pInfo[client].fLastTime = 0.0;
 }
 
-/*
-L 05/17/2022 - 22:47:16: [SM] Exception reported: Invalid Handle 0 (error 4)
-L 05/17/2022 - 22:47:16: [SM] Blaming: block-frequent-pleft-pright.smx
-L 05/17/2022 - 22:47:16: [SM] Call stack trace:
-L 05/17/2022 - 22:47:16: [SM]   [0] StringMap.GetArray
-L 05/17/2022 - 22:47:16: [SM]   [1] Line 54, .\block-frequent-pleft-pright.sp::Shavit_OnCheckpointCacheLoaded
-L 05/17/2022 - 22:47:16: [SM]   [3] Call_Finish
-L 05/17/2022 - 22:47:16: [SM]   [4] Line 1980, .\shavit-checkpoints.sp::LoadCheckpointCache
-L 05/17/2022 - 22:47:16: [SM]   [5] Line 1836, .\shavit-checkpoints.sp::TeleportToCheckpoint
-L 05/17/2022 - 22:47:16: [SM]   [6] Line 1219, .\shavit-checkpoints.sp::MenuHandler_Checkpoints
+/**
+ * 因为原 timer 使用此功能会报错, 所以注释掉了
+ * 解决方法: 在 shavit-checkpoints.sp 中以下两个函数前加 public 关键字后重新编译
+ * public void SaveCheckpointCache(int saver, int target, cp_cache_t cpcache, int index, Handle plugin)
+ * public bool LoadCheckpointCache(int client, cp_cache_t cpcache, int index, bool force)
+ *
+ * L 05/17/2022 - 22:47:16: [SM] Exception reported: Invalid Handle 0 (error 4)
+ * L 05/17/2022 - 22:47:16: [SM] Blaming: block-frequent-pleft-pright.smx
+ * L 05/17/2022 - 22:47:16: [SM] Call stack trace:
+ * L 05/17/2022 - 22:47:16: [SM]   [0] StringMap.GetArray
+ * L 05/17/2022 - 22:47:16: [SM]   [1] Line 54, .\block-frequent-pleft-pright.sp::Shavit_OnCheckpointCacheLoaded
+ * L 05/17/2022 - 22:47:16: [SM]   [3] Call_Finish
+ * L 05/17/2022 - 22:47:16: [SM]   [4] Line 1980, .\shavit-checkpoints.sp::LoadCheckpointCache
+ * L 05/17/2022 - 22:47:16: [SM]   [5] Line 1836, .\shavit-checkpoints.sp::TeleportToCheckpoint
+ * L 05/17/2022 - 22:47:16: [SM]   [6] Line 1219, .\shavit-checkpoints.sp::MenuHandler_Checkpoints
  */
 
-/*
+// 存点中保留 +left/+right 次数
 public void Shavit_OnCheckpointCacheSaved(int client, cp_cache_t cpcache, int index, int target) {
-	cpcache.customdata.SetArray("pInfo", g_pInfo[client], sizeof(pInfo), true);
+	// cpcache.customdata.SetArray("pInfo", g_pInfo[client], sizeof(pInfo), true);
 }
 
 public void Shavit_OnCheckpointCacheLoaded(int client, cp_cache_t cpcache, int index) {
-	cpcache.customdata.GetArray("pInfo", g_pInfo[client], sizeof(pInfo));
+	// cpcache.customdata.GetArray("pInfo", g_pInfo[client], sizeof(pInfo));
 }
- */
 
 public Action Shavit_OnUserCmdPre(
 	int client, int &buttons, int &impulse,
@@ -79,6 +83,8 @@ public Action Shavit_OnUserCmdPre(
 		 || Shavit_GetClientTime(client) == 0.0
 		// TAS 模式不检测
 		 || Shavit_GetStyleSettingBool(style, "tas")
+		// 练习模式不检测
+		 || Shavit_IsPracticeMode(client)
 	) {
 		return Plugin_Continue;
 	}
