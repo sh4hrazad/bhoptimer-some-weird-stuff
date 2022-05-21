@@ -35,18 +35,13 @@ public Plugin myinfo = {
 #include <shavit/hud>
 #include <shavit/replay-playback>
 #include <DynamicChannels>
+#include <cookiemgr>
 
 #define POSITION_CENTER -1.0
 #define HUD_BUF_SIZE 64
 
 #pragma newdecls required
 #pragma semicolon 1
-
-enum CookieType {
-	CT_Integer = 0,
-	CT_Boolean,
-	CT_Float
-};
 
 enum {
 	AXIS_X = 0,
@@ -59,7 +54,6 @@ enum struct SpeedCookies {
 	Cookie positionY;
 	Cookie dynamic;
 	Cookie speedDiff;
-	Cookie freshman;
 }
 
 enum struct SpeedSettings {
@@ -86,7 +80,7 @@ public void OnPluginStart() {
 	Cookies.positionY = new Cookie("showspeed_positiony", "[zSpeed] Position (y)", CookieAccess_Protected);
 	Cookies.dynamic   = new Cookie("showspeed_dynamic", "[zSpeed] Dynamic Colors", CookieAccess_Protected);
 	Cookies.speedDiff = new Cookie("showspeed_difference", "[zSpeed] Speed Difference", CookieAccess_Protected);
-	Cookies.freshman  = new Cookie("showspeed_freshman", "[zSpeed] Freshman", CookieAccess_Protected);
+	RegisterFreshmanCookie("zSpeed");
 
 	for (int i = 1; i <= MaxClients; i++) {
 		if (AreClientCookiesCached(i)) {
@@ -102,13 +96,13 @@ public void OnClientPutInServer(int client) {
 /* -- Cookies -- */
 
 public void OnClientCookiesCached(int client) {
-	if(!GetCookie(client, Cookies.freshman, CT_Boolean)) {
+	if(IsFreshman(client)) {
 		SetCookie(client, Cookies.showSpeed, CT_Boolean, true);
 		SetCookie(client, Cookies.positionX, CT_Float,   POSITION_CENTER);
 		SetCookie(client, Cookies.positionY, CT_Float,   0.55);
 		SetCookie(client, Cookies.dynamic,   CT_Boolean, true);
-		SetCookie(client, Cookies.speedDiff, CT_Boolean, true);
-		SetCookie(client, Cookies.freshman,  CT_Boolean, true);
+		SetCookie(client, Cookies.speedDiff, CT_Boolean, false);
+		SetFreshmanCookie(client);
 	}
 
 	Settings[client].showSpeed   = GetCookie(client, Cookies.showSpeed, CT_Boolean);
@@ -116,38 +110,6 @@ public void OnClientCookiesCached(int client) {
 	Settings[client].position[1] = GetCookie(client, Cookies.positionY, CT_Float);
 	Settings[client].dynamic     = GetCookie(client, Cookies.dynamic,   CT_Boolean);
 	Settings[client].speedDiff   = GetCookie(client, Cookies.speedDiff, CT_Boolean);
-}
-
-void SetCookie(int client, Cookie cookie, CookieType type, any value) {
-	char sValue[8];
-
-	switch (type) {
-		case CT_Integer, CT_Boolean: {
-			IntToString(view_as<int>(value), sValue, sizeof(sValue));
-		}
-		case CT_Float: {
-			FloatToString(view_as<float>(value), sValue, sizeof(sValue));
-		}
-	}
-	
-	cookie.Set(client, sValue);
-}
-
-any GetCookie(int client, Cookie cookie, CookieType type) {
-	char sValue[8];
-
-	cookie.Get(client, sValue, sizeof(sValue));
-
-	switch (type) {
-		case CT_Integer, CT_Boolean: {
-			return StringToInt(sValue);
-		}
-		case CT_Float: {
-			return StringToFloat(sValue);
-		}
-	}
-
-	return -1;
 }
 
 void OnCookieChanged(int client) {
@@ -221,6 +183,10 @@ int ZSpeedMenu_Handler(Menu menu, MenuAction action, int param1, int param2) {
 			Settings[param1].dynamic = !Settings[param1].dynamic;
 		} else if (StrEqual(sInfo, "difference")) {
 			Settings[param1].speedDiff = !Settings[param1].speedDiff;
+
+			if (Settings[param1].speedDiff) {
+				CPrintToChat(param1, "{orange}注意: {white}显示速度差可能会导致其他 HUD 插件显示异常.");
+			}
 		}
 
 		OnCookieChanged(param1);
